@@ -3,17 +3,28 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 require('dotenv').config();
 
-const Transaction = require('./models/Transaction');
+const Income = require('./models/Income');
+const Expense = require('./models/Expense');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
+const authRouter = require('./routes/auth');
+const authMiddleware = require('./middleware/auth');
+
+app.use('/api/auth', authRouter);
+
 // Routes
 // GET all transactions
-app.get('/api/transactions', async (req, res) => {
+app.get('/api/transactions', authMiddleware, async (req, res) => {
   try {
-    const transactions = await Transaction.find().sort({ date: -1, _id: -1 });
+    const incomes = await Income.find({ user: req.user.id });
+    const expenses = await Expense.find({ user: req.user.id });
+    const transactions = [...incomes, ...expenses].sort((a, b) => {
+      // Sort by date descending, then secondary condition if needed
+      return new Date(b.date) - new Date(a.date);
+    });
     res.json(transactions);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -21,10 +32,17 @@ app.get('/api/transactions', async (req, res) => {
 });
 
 // POST a new transaction
-app.post('/api/transactions', async (req, res) => {
+app.post('/api/transactions', authMiddleware, async (req, res) => {
   try {
-    const newTransaction = new Transaction(req.body);
-    const savedTransaction = await newTransaction.save();
+    const { type, ...rest } = req.body;
+    let savedTransaction;
+    if (type === 'income') {
+      const newIncome = new Income({ ...rest, user: req.user.id });
+      savedTransaction = await newIncome.save();
+    } else {
+      const newExpense = new Expense({ ...rest, user: req.user.id });
+      savedTransaction = await newExpense.save();
+    }
     res.status(201).json(savedTransaction);
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -32,10 +50,24 @@ app.post('/api/transactions', async (req, res) => {
 });
 
 // DELETE a transaction
-app.delete('/api/transactions/:id', async (req, res) => {
+app.delete('/api/transactions/:id', authMiddleware, async (req, res) => {
   try {
-    await Transaction.findByIdAndDelete(req.params.id);
-    res.status(200).json({ message: 'Transaction deleted' });
+    const id = req.params.id;
+    let transaction = await Income.findById(id);
+    if (transaction) {
+      if (transaction.user.toString() !== req.user.id) return res.status(401).json({ error: 'Unauthorized' });
+      await Income.findByIdAndDelete(id);
+      return res.status(200).json({ message: 'Transaction deleted' });
+    }
+    
+    transaction = await Expense.findById(id);
+    if (transaction) {
+      if (transaction.user.toString() !== req.user.id) return res.status(401).json({ error: 'Unauthorized' });
+      await Expense.findByIdAndDelete(id);
+      return res.status(200).json({ message: 'Transaction deleted' });
+    }
+
+    return res.status(404).json({ error: 'Not found' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

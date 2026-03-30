@@ -220,3 +220,146 @@ select option { background: var(--surface); color: var(--text); }
     grid-column: span 1;
   }
 }
+
+/* AUTH UI STYLES */
+.auth-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  flex: 1;
+}
+.auth-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+.auth-box {
+  background: transparent;
+  width: 100%;
+  max-width: 440px;
+  border-radius: 12px;
+}
+.auth-tabs {
+  display: flex;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+.auth-tab {
+  flex: 1;
+  text-align: center;
+  padding: 14px 0;
+  font-weight: 500;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.auth-tab.active {
+  background: var(--accent);
+  color: #000;
+  border-radius: 10px;
+}
+.auth-form-group {
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.auth-form-group label {
+  font-size: 11px;
+  color: #a0a0a0;
+  letter-spacing: 1px;
+}
+.auth-form-group input {
+  background: var(--surface);
+  border: 1px solid transparent;
+  padding: 14px 16px;
+  border-radius: 10px;
+  color: var(--text);
+  font-size: 14px;
+  width: 100%;
+}
+.auth-form-group input:focus {
+  border-color: #444;
+}
+.auth-form-group input::placeholder {
+  color: #555;
+}
+.input-icon-wrapper {
+  position: relative;
+}
+.eye-icon {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #555;
+  font-size: 16px;
+}
+.password-strength {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+}
+.strength-bar {
+  flex: 1;
+  height: 4px;
+  background: #333;
+  border-radius: 2px;
+  transition: background 0.3s;
+}
+.strength-bar.active {
+  background: var(--accent); /* wait, usually strength colors change, but accent is safe */
+}
+.auth-submit-btn {
+  width: 100%;
+  padding: 14px;
+  background: var(--accent);
+  color: #000;
+  border: none;
+  border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: opacity 0.2s;
+}
+.auth-submit-btn:hover:not(:disabled) {
+  opacity: 0.9;
+}
+.auth-submit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* HEADER USER AVATAR */
+.user-badge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface2);
+  border-radius: 24px;
+  padding: 4px 16px 4px 4px;
+  border: 1px solid var(--border);
+}
+.avatar {
+  background: var(--accent);
+  color: #000;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 14px;
+}
+.username-text {
+  font-weight: 500;
+  font-size: 14px;
+}

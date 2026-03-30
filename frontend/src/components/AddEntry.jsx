@@ -1,13 +1,29 @@
 import React, { useState } from 'react';
 import { CATS } from '../utils';
-import { addTransaction } from '../api';
+import { addTransaction, addCategory } from '../api';
 
-function AddEntry({ onAddSuccess }) {
+function AddEntry({ onAddSuccess, user, setUser }) {
   const [type, setType] = useState('income');
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [category, setCategory] = useState('');
   const [description, setDescription] = useState('');
+  const [isAddingCategory, setIsAddingCategory] = useState(false);
+  const [newCatName, setNewCatName] = useState('');
+
+  const handleCreateCategory = async () => {
+    if (!newCatName.trim()) return;
+    try {
+      const { data } = await addCategory(newCatName.trim());
+      setUser({ ...user, categories: data.categories });
+      localStorage.setItem('user', JSON.stringify({ ...user, categories: data.categories }));
+      setCategory(newCatName.trim());
+      setIsAddingCategory(false);
+      setNewCatName('');
+    } catch (err) {
+      alert('Failed to add category');
+    }
+  };
 
   const handleSubmit = async () => {
     const parsedAmount = parseFloat(amount);
@@ -77,12 +93,50 @@ function AddEntry({ onAddSuccess }) {
         
         <div className="form-group">
           <label>Category</label>
-          <select value={category} onChange={(e) => setCategory(e.target.value)}>
-            <option value="">Select category</option>
-            {CATS[type].map(c => (
-              <option key={c.name} value={c.name}>{c.icon} {c.name}</option>
-            ))}
-          </select>
+          {!isAddingCategory ? (
+            <select 
+              value={category} 
+              onChange={(e) => {
+                if (e.target.value === 'ADD_NEW') setIsAddingCategory(true);
+                else setCategory(e.target.value);
+              }}
+            >
+              <option value="">Select category</option>
+              {CATS[type].map(c => (
+                <option key={c.name} value={c.name}>{c.icon} {c.name}</option>
+              ))}
+              <optgroup label="Custom Categories">
+                {user?.categories?.filter(c => !CATS[type].find(dc => dc.name === c)).map(c => (
+                  <option key={c} value={c}>💳 {c}</option>
+                ))}
+                <option value="ADD_NEW">+ Add New Category</option>
+              </optgroup>
+            </select>
+          ) : (
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <input 
+                type="text" 
+                placeholder="New category..." 
+                value={newCatName}
+                onChange={(e) => setNewCatName(e.target.value)}
+                autoFocus
+              />
+              <button 
+                className="btn-submit" 
+                style={{ width: 'auto', padding: '0 15px', background: 'var(--success)' }}
+                onClick={handleCreateCategory}
+              >
+                Add
+              </button>
+              <button 
+                className="btn-submit" 
+                style={{ width: 'auto', padding: '0 15px', background: 'var(--surface2)', color: 'var(--text)' }}
+                onClick={() => setIsAddingCategory(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          )}
         </div>
         
         <div className="form-group">

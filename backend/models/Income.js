@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
 
-const transactionSchema = new mongoose.Schema({
-  type: {
-    type: String,
-    enum: ['income', 'expense'],
+const incomeSchema = new mongoose.Schema({
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
     required: true
   },
   amount: {
@@ -26,13 +26,14 @@ const transactionSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Convert _id to id when sending JSON to match frontend expectations
-transactionSchema.set('toJSON', {
+incomeSchema.set('toJSON', {
   virtuals: true,
   versionKey: false,
   transform: (doc, ret) => {
     ret.id = ret._id;
     delete ret._id;
+    ret.type = 'income'; // Dynamically add type for frontend
   }
 });
 
-module.exports = mongoose.model('Transaction', transactionSchema);
+module.exports = mongoose.model('Income', incomeSchema);
