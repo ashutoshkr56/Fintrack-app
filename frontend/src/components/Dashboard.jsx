@@ -60,7 +60,7 @@ function Dashboard({ transactions, onDelete }) {
         <div className="panel">
           <div className="panel-title">Expense by Category</div>
           {pieLabels.length ? (
-            <div style={{ maxHeight: '220px', display: 'flex', justifyContent: 'center' }}>
+            <div style={{ height: '220px', width: '100%', position: 'relative' }}>
               <Doughnut data={pieChartData} options={{ maintainAspectRatio: false, plugins: { legend: { labels: { color: '#888', font: { size: 11 }, boxWidth: 12 } } }, cutout: '62%' }} />
             </div>
           ) : (
@@ -73,7 +73,7 @@ function Dashboard({ transactions, onDelete }) {
         
         <div className="panel">
           <div className="panel-title">Income vs Expense</div>
-          <div style={{ maxHeight: '220px', display: 'flex', justifyContent: 'center' }}>
+          <div style={{ height: '220px', width: '100%', position: 'relative' }}>
             <Bar data={barChartData} options={{ maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#888' }, grid: { color: '#2e2e2e' } }, y: { ticks: { color: '#888', callback: v => '₹' + v.toLocaleString('en-IN') }, grid: { color: '#2e2e2e' } } } }} />
           </div>
         </div>

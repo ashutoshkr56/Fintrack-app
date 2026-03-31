@@ -20,6 +20,7 @@ api.interceptors.request.use((config) => {
 
 export const getTransactions = () => api.get('/transactions');
 export const addTransaction = (txn) => api.post('/transactions', txn);
+export const updateTransaction = (id, txn) => api.put(`/transactions/${id}`, txn);
 export const deleteTransaction = (id) => api.delete(`/transactions/${id}`);
 export const login = (data) => api.post('/auth/login', data);
 export const register = (data) => api.post('/auth/register', data);

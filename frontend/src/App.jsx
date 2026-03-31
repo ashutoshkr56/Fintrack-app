@@ -3,6 +3,7 @@ import Dashboard from './components/Dashboard';
 import AddEntry from './components/AddEntry';
 import Transactions from './components/Transactions';
 import Analytics from './components/Analytics';
+import Reports from './components/Reports';
 import Auth from './components/Auth';
 import { getTransactions, deleteTransaction as deleteTxApi } from './api';
 
@@ -145,6 +146,7 @@ function App() {
             <div className={`tab ${activeTab === 'add' ? 'active' : ''}`} onClick={() => setActiveTab('add')}>+ Add Entry</div>
             <div className={`tab ${activeTab === 'transactions' ? 'active' : ''}`} onClick={() => setActiveTab('transactions')}>Transactions</div>
             <div className={`tab ${activeTab === 'analytics' ? 'active' : ''}`} onClick={() => setActiveTab('analytics')}>Analytics</div>
+            <div className={`tab ${activeTab === 'reports' ? 'active' : ''}`} onClick={() => setActiveTab('reports')}>↓ Reports</div>
           </div>
       
       <main>
@@ -165,11 +167,21 @@ function App() {
             </div>
             
             <div className={`page ${activeTab === 'transactions' ? 'active' : ''}`}>
-              <Transactions transactions={transactions} onDelete={handleDelete} />
+              <Transactions 
+                transactions={transactions} 
+                onDelete={handleDelete} 
+                onEditSuccess={fetchTransactions} 
+                user={user} 
+                setUser={setUser}
+              />
             </div>
             
             <div className={`page ${activeTab === 'analytics' ? 'active' : ''}`}>
               <Analytics transactions={transactions} />
+            </div>
+
+            <div className={`page ${activeTab === 'reports' ? 'active' : ''}`}>
+              <Reports transactions={transactions} />
             </div>
           </>
         )}

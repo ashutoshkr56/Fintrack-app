@@ -49,6 +49,55 @@ app.post('/api/transactions', authMiddleware, async (req, res) => {
   }
 });
 
+// UPDATE a transaction
+app.put('/api/transactions/:id', authMiddleware, async (req, res) => {
+  try {
+    const id = req.params.id;
+    const { type, amount, date, category, description } = req.body;
+    
+    // Find where the transaction currently lives
+    let isIncome = await Income.findById(id);
+    let isExpense = null;
+    if (!isIncome) {
+      isExpense = await Expense.findById(id);
+    }
+    
+    const oldTransaction = isIncome || isExpense;
+    if (!oldTransaction) return res.status(404).json({ error: 'Not found' });
+    if (oldTransaction.user.toString() !== req.user.id) return res.status(401).json({ error: 'Unauthorized' });
+
+    const oldType = isIncome ? 'income' : 'expense';
+
+    if (oldType === type) {
+      // Standard update
+      const updateData = { amount, date, category, description };
+      if (oldType === 'income') {
+        const updated = await Income.findByIdAndUpdate(id, updateData, { new: true });
+        return res.json(updated);
+      } else {
+        const updated = await Expense.findByIdAndUpdate(id, updateData, { new: true });
+        return res.json(updated);
+      }
+    } else {
+      // Type changed, delete from old and insert to new collection
+      const newData = { amount, date, category, description, user: req.user.id };
+      if (oldType === 'income') {
+        await Income.findByIdAndDelete(id);
+        const newExpense = new Expense(newData);
+        const saved = await newExpense.save();
+        return res.json(saved);
+      } else {
+        await Expense.findByIdAndDelete(id);
+        const newIncome = new Income(newData);
+        const saved = await newIncome.save();
+        return res.json(saved);
+      }
+    }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // DELETE a transaction
 app.delete('/api/transactions/:id', authMiddleware, async (req, res) => {
   try {
