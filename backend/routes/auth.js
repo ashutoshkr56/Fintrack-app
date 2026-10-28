@@ -37,8 +37,8 @@ router.post('/register', async (req, res) => {
       }
     );
   } catch (err) {
-    console.error(err.message);
-    res.status(500).json({ error: 'Server error' });
+    console.error('Register error:', err.message);
+    res.status(500).json({ error: err.message || 'Server error', message: err.message || 'Server error' });
   }
 });
 
@@ -72,8 +72,8 @@ router.post('/login', async (req, res) => {
       }
     );
   } catch (err) {
-    console.error(err.message);
-    res.status(500).json({ error: 'Server error' });
+    console.error('Login error:', err.message);
+    res.status(500).json({ error: err.message || 'Server error', message: err.message || 'Server error' });
   }
 });
 
@@ -92,7 +92,8 @@ router.post('/categories', auth, async (req, res) => {
     }
     res.json({ categories: user.categories });
   } catch (err) {
-    res.status(500).json({ error: 'Server error' });
+    console.error('Categories error:', err.message);
+    res.status(500).json({ error: err.message || 'Server error', message: err.message || 'Server error' });
   }
 });
 

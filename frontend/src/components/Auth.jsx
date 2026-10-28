@@ -47,7 +47,7 @@ const Auth = ({ onAuthSuccess }) => {
         onAuthSuccess(data.token, data.user);
       }
     } catch (err) {
-      setError(err.response?.data?.message || err.message || 'Authentication failed');
+      setError(err.response?.data?.message || err.response?.data?.error || err.message || 'Authentication failed');
     } finally {
       setLoading(false);
     }

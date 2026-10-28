@@ -17,6 +17,44 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+const PORT = process.env.PORT || 5000;
+const MONGO_URI = process.env.MONGO_URI || process.env.MONGODB_URI;
+
+// Cached connection for serverless / Vercel
+let isConnected = false;
+const connectDB = async () => {
+  if (isConnected && mongoose.connection.readyState === 1) return;
+  if (!MONGO_URI) {
+    throw new Error('MONGO_URI is not set in Vercel Environment Variables. Please add MONGO_URI in Vercel Settings.');
+  }
+  const db = await mongoose.connect(MONGO_URI);
+  isConnected = db.connections[0].readyState === 1;
+};
+
+// Root health-check route (does not block on DB)
+app.get('/', (req, res) => {
+  res.json({
+    status: 'ok',
+    message: 'FinTrack Backend API is running',
+    dbConnected: mongoose.connection.readyState === 1,
+    hasMongoUri: !!MONGO_URI
+  });
+});
+
+// Middleware to ensure DB is connected before processing API requests
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    console.error('Database connection error:', err.message);
+    return res.status(500).json({
+      error: 'Database connection failed: ' + err.message,
+      message: 'Database connection failed: ' + err.message
+    });
+  }
+});
+
 const authRouter = require('./routes/auth');
 const authMiddleware = require('./middleware/auth');
 
@@ -129,23 +167,15 @@ app.delete('/api/transactions/:id', authMiddleware, async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 5000;
-const MONGO_URI = process.env.MONGO_URI || process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/fintrack';
-
-mongoose.connect(MONGO_URI)
-  .then(() => {
-    console.log('Connected to MongoDB');
-    // Only listen if we are not running in production (Vercel)
-    if (process.env.NODE_ENV !== 'production') {
-        app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-    }
-  })
-  .catch((err) => {
-    console.log('Failed to connect to MongoDB. Ensure your URI is correct:', err.message);
-    if (process.env.NODE_ENV !== 'production') {
-        app.listen(PORT, () => console.log(`Server running on port ${PORT} WITHOUT DB`));
-    }
+// Only listen when running standalone locally (not on Vercel production serverless)
+if (process.env.NODE_ENV !== 'production') {
+  connectDB().then(() => {
+    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  }).catch((err) => {
+    console.log(`Server running on port ${PORT} WITHOUT DB:`, err.message);
+    app.listen(PORT);
   });
+}
 
 // Export the app for Vercel serverless function
 module.exports = app;
