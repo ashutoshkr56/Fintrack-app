@@ -14,12 +14,12 @@ const Auth = ({ onAuthSuccess }) => {
 
   // Simple password strength calculation
   const getPasswordStrength = () => {
-    let strength = 0;
-    if (password.length > 5) strength += 1;
-    if (password.length > 8) strength += 1;
-    if (/[A-Z]/.test(password)) strength += 1;
-    if (/[0-9]/.test(password) || /[^A-Za-z0-9]/.test(password)) strength += 1;
-    return strength;
+    let score = 0;
+    if (password.length >= 8) score++;
+    if (/[A-Z]/.test(password)) score++;
+    if (/[0-9]/.test(password)) score++;
+    if (/[^A-Za-z0-9]/.test(password)) score++;
+    return score;
   };
 
   const strength = getPasswordStrength();
@@ -38,7 +38,7 @@ const Auth = ({ onAuthSuccess }) => {
       if (isLogin) {
         const { data } = await login({ username, password });
         localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
+        
         onAuthSuccess(data.token, data.user);
       } else {
         const { data } = await register({ fullName, username, email: `${username}@temp.com`, password });

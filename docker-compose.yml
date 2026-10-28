@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  backend:
+    image: ashutoshkr56/fintrack-backend:latest
+    container_name: fintrack-backend
+    ports:
+      - "5000:5000"
+    environment:
+      - MONGO_URI=${MONGO_URI}
+      - NODE_ENV=production
+    restart: unless-stopped
+
+  frontend:
+    image: ashutoshkr56/fintrack-frontend:latest
+    container_name: fintrack-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped

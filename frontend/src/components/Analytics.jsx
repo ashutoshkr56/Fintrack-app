@@ -10,7 +10,7 @@ const MONTHS = [
 function Analytics({ transactions }) {
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth();
-  
+
   const [reportMonth, setReportMonth] = useState(currentMonth.toString());
   const [reportYear, setReportYear] = useState(currentYear.toString());
 

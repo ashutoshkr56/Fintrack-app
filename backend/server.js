@@ -1,6 +1,13 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const dns = require('dns');
+
+// Ensure SRV records for Atlas resolve cleanly on local networks
+try {
+  dns.setServers(['8.8.8.8', '8.8.4.4', '1.1.1.1']);
+} catch (e) {}
+
 require('dotenv').config();
 
 const Income = require('./models/Income');
@@ -123,7 +130,7 @@ app.delete('/api/transactions/:id', authMiddleware, async (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/fintrack';
+const MONGO_URI = process.env.MONGO_URI || process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/fintrack';
 
 mongoose.connect(MONGO_URI)
   .then(() => {
